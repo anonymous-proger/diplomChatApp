@@ -1,0 +1,28 @@
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.chat-panel {
+  flex: 0 0 30%;
+  max-width: 400px;
+  min-width: 250px;
+}
+
+.chat-window {
+  flex: 1;
+  min-width: 0;
+}
