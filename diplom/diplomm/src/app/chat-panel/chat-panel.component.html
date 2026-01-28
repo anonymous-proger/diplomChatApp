@@ -1,12 +1,68 @@
 <div class="chat-panel">
+  <!-- Поиск -->
   <div class="search-container">
-    <input 
-      type="text" 
-      class="search-input" 
-      placeholder="Search chats..."
-    />
+    <div class="search-wrapper">
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="найти чаты"
+        [(ngModel)]="searchQuery"
+        (input)="onSearch()"
+      />
+      <button class="clear-btn" (click)="clearSearch()" *ngIf="searchQuery">
+        ✕
+      </button>
+    </div>
   </div>
-  
+
   <div class="chats-list">
+    <div *ngIf="filteredChats.length === 0" class="no-results">
+      Ничего не нашли
+    </div>
+
+    <div 
+      *ngFor="let chat of filteredChats" 
+      class="chat-item"
+      [class.active]="chat.id === selectedChatId"
+      (click)="selectChat(chat.id)"
+    >
+      <div class="avatar-container">
+        <div class="avatar">
+          <img [src]="chat.avatar" [alt]="chat.name" />
+        </div>
+        <div class="online-indicator" [class.online]="chat.isOnline"></div>
+      </div>
+
+
+      <div class="chat-info">
+        <div class="chat-header">
+          <span class="chat-name">{{ chat.name }}</span>
+          <span class="chat-time">{{ chat.time }}</span>
+        </div>
+        
+        <div class="chat-preview">
+          <p class="last-message">{{ chat.lastMessage }}</p>
+          
+          <div class="chat-meta">
+            <span class="status" [class.online]="chat.isOnline">
+              {{ getStatusText(chat) }}
+            </span>
+            <span *ngIf="chat.unread > 0" class="unread-count">
+              {{ chat.unread }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+
+      <div *ngIf="chat.unread > 0" class="unread-badge">
+        {{ chat.unread }}
+      </div>
+    </div>
+  </div>
+
+ 
+  <div class="panel-footer">
+    <span class="chats-count">{{ filteredChats.length }} чат(ов)</span>
   </div>
 </div>

@@ -1,0 +1,103 @@
+<div class="chat-window" *ngIf="selectedChat; else noChatSelected">
+  <!-- Заголовок чата -->
+  <div class="chat-header">
+    <div class="chat-info">
+      <div class="avatar-container">
+        <div class="avatar">
+          <img [src]="selectedChat.avatar" [alt]="selectedChat.name" />
+        </div>
+        <div class="online-indicator" [class.online]="selectedChat.isOnline"></div>
+      </div>
+
+      <div class="chat-details">
+        <h2 class="chat-name">{{ selectedChat.name }}</h2>
+        <p class="chat-status" [class.online]="selectedChat.isOnline">
+          {{ selectedChat.isOnline ? 'Online' : 'Offline' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="chat-actions">
+      <button class="action-btn" title="Search in chat">
+        🔍
+      </button>
+      <button class="action-btn" title="More options">
+        ⋮
+      </button>
+    </div>
+  </div>
+
+
+  <div class="messages-container" #messagesContainer>
+    <div class="messages">
+   
+      <div class="date-divider" *ngIf="messages.length > 0">
+        <span>{{ isTodayMessage(messages[0].time) ? 'Today' : 'Yesterday' }}</span>
+      </div>
+
+      <div *ngFor="let message of messages" 
+           class="message-wrapper"
+           [class.outgoing]="message.isOutgoing">
+        
+        <div class="message">
+
+          <div class="sender-name" *ngIf="!message.isOutgoing && message.senderName">
+            {{ message.senderName }}
+          </div>
+
+          <div class="message-bubble">
+            <p class="message-text">{{ message.text }}</p>
+            <div class="message-footer">
+              <span class="message-time">{{ getMessageTime(message.time) }}</span>
+              
+              <span class="message-status" *ngIf="message.isOutgoing">
+                {{ message.status === 'read' ? '✓✓' : 
+                   message.status === 'delivered' ? '✓✓' : '✓' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="message-input-container">
+    <div class="input-actions">
+      <button class="action-btn" title="Attach file">
+        📎
+      </button>
+      <button class="action-btn" title="Emoji">
+        😀
+      </button>
+    </div>
+
+    <div class="input-wrapper">
+      <textarea 
+        class="message-input" 
+        placeholder="Type a message..."
+        [(ngModel)]="newMessage"
+        (keydown)="onKeyPress($event)"
+        rows="1"
+        #messageInput
+      ></textarea>
+    </div>
+
+    <button 
+      class="send-btn" 
+      (click)="sendMessage()"
+      [disabled]="!newMessage.trim()"
+    >
+      Send
+    </button>
+  </div>
+</div>
+
+<ng-template #noChatSelected>
+  <div class="no-chat-selected">
+    <div class="placeholder-content">
+      <div class="placeholder-icon">💬</div>
+      <h2 class="placeholder-title">Welcome to ChatMessage</h2>
+      <p class="placeholder-text">Select a chat to start messaging</p>
+    </div>
+  </div>
+</ng-template>

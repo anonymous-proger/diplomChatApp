@@ -20,9 +20,12 @@
   flex: 0 0 30%;
   max-width: 400px;
   min-width: 250px;
+  border-right: 1px solid #e0e0e0;
+  height: 100%;
 }
 
 .chat-window {
   flex: 1;
   min-width: 0;
+  height: 100%;
 }
