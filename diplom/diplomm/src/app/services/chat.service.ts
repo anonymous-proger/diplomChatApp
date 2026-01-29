@@ -12,7 +12,7 @@ export class ChatService {
       name: 'user',
       lastMessage: 'привет',
       time: '10:30',
-      unread: 2,
+      unread: 0,
       avatar: "assets/images/user.png",
       isOnline: true
     },
@@ -29,8 +29,8 @@ export class ChatService {
       id: '3',
       name: 'работа',
       lastMessage: 'почему опаздваем?',
-      time: 'Yesterday',
-      unread: 5,
+      time: '10:10',
+      unread: 0,
       avatar: 'assets/images/work.png',
       isOnline: true
     }
@@ -38,7 +38,7 @@ export class ChatService {
 
   private messages: { [chatId: string]: Message[] } = {
     '1': [
-
+       { text: 'Привет! Как дела?', time: '10:25', isOutgoing: false, senderName: 'User' },
     ],
     '2': [
       

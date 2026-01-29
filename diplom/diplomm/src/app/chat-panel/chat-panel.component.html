@@ -5,7 +5,7 @@
       <input 
         type="text" 
         class="search-input" 
-        placeholder="найти чаты"
+        placeholder="Поиск чатов..."
         [(ngModel)]="searchQuery"
         (input)="onSearch()"
       />
@@ -17,7 +17,7 @@
 
   <div class="chats-list">
     <div *ngIf="filteredChats.length === 0" class="no-results">
-      Ничего не нашли
+      Ничего не нашли :(
     </div>
 
     <div 
@@ -33,7 +33,6 @@
         <div class="online-indicator" [class.online]="chat.isOnline"></div>
       </div>
 
-
       <div class="chat-info">
         <div class="chat-header">
           <span class="chat-name">{{ chat.name }}</span>
@@ -47,22 +46,14 @@
             <span class="status" [class.online]="chat.isOnline">
               {{ getStatusText(chat) }}
             </span>
-            <span *ngIf="chat.unread > 0" class="unread-count">
-              {{ chat.unread }}
-            </span>
           </div>
         </div>
       </div>
 
-
-      <div *ngIf="chat.unread > 0" class="unread-badge">
-        {{ chat.unread }}
-      </div>
     </div>
   </div>
 
- 
   <div class="panel-footer">
-    <span class="chats-count">{{ filteredChats.length }} чат(ов)</span>
+    <span class="chats-count">{{ filteredChats.length }} chats</span>
   </div>
 </div>

@@ -21,7 +21,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   constructor(private chatService: ChatService) {}
 
   ngOnInit(): void {
-  
+ 
     const chatSub = this.chatService.selectedChat$.subscribe(chat => {
       this.selectedChat = chat;
       if (chat) {
@@ -34,7 +34,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   ngAfterViewChecked(): void {
-
     if (this.shouldScrollToBottom) {
       this.scrollToBottom();
       this.shouldScrollToBottom = false;
@@ -76,5 +75,22 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   isTodayMessage(time: string): boolean {
     return !time.includes('Yesterday');
+  }
+
+
+  shouldShowAvatar(index: number): boolean {
+    if (index === 0) return true;
+    
+    const currentMessage = this.messages[index];
+    const previousMessage = this.messages[index - 1];
+    
+    return !currentMessage.isOutgoing && 
+           (previousMessage.isOutgoing || 
+            previousMessage.senderName !== currentMessage.senderName ||
+            this.isDifferentTimeGroup(currentMessage.time, previousMessage.time));
+  }
+
+  private isDifferentTimeGroup(time1: string, time2: string): boolean {
+    return time1 !== time2;
   }
 }

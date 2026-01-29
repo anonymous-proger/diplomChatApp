@@ -1,4 +1,4 @@
-<div class="chat-window" *ngIf="selectedChat; else noChatSelected">
+<div class="chat-window" *ngIf="selectedChat">
   <!-- Заголовок чата -->
   <div class="chat-header">
     <div class="chat-info">
@@ -27,20 +27,23 @@
     </div>
   </div>
 
-
   <div class="messages-container" #messagesContainer>
     <div class="messages">
-   
+
       <div class="date-divider" *ngIf="messages.length > 0">
         <span>{{ isTodayMessage(messages[0].time) ? 'Today' : 'Yesterday' }}</span>
       </div>
 
-      <div *ngFor="let message of messages" 
+      <div *ngFor="let message of messages; let i = index" 
            class="message-wrapper"
-           [class.outgoing]="message.isOutgoing">
+           [class.outgoing]="message.isOutgoing"
+           [class.with-avatar]="!message.isOutgoing && shouldShowAvatar(i)">
         
-        <div class="message">
+        <div class="message-avatar" *ngIf="!message.isOutgoing && shouldShowAvatar(i)">
+          <img [src]="selectedChat.avatar" [alt]="selectedChat.name" />
+        </div>
 
+        <div class="message" [class.with-avatar]="!message.isOutgoing && shouldShowAvatar(i)">
           <div class="sender-name" *ngIf="!message.isOutgoing && message.senderName">
             {{ message.senderName }}
           </div>
@@ -49,11 +52,6 @@
             <p class="message-text">{{ message.text }}</p>
             <div class="message-footer">
               <span class="message-time">{{ getMessageTime(message.time) }}</span>
-              
-              <span class="message-status" *ngIf="message.isOutgoing">
-                {{ message.status === 'read' ? '✓✓' : 
-                   message.status === 'delivered' ? '✓✓' : '✓' }}
-              </span>
             </div>
           </div>
         </div>
@@ -91,13 +89,3 @@
     </button>
   </div>
 </div>
-
-<ng-template #noChatSelected>
-  <div class="no-chat-selected">
-    <div class="placeholder-content">
-      <div class="placeholder-icon">💬</div>
-      <h2 class="placeholder-title">Welcome to ChatMessage</h2>
-      <p class="placeholder-text">Select a chat to start messaging</p>
-    </div>
-  </div>
-</ng-template>
