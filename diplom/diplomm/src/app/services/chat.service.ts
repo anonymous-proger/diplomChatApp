@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { Chat, Message } from '../models/chat.model';
 
 @Injectable({
@@ -10,16 +10,16 @@ export class ChatService {
     {
       id: '1',
       name: 'user',
-      lastMessage: 'привет',
+      lastMessage: 'Привет! Как дела?',
       time: '10:30',
       unread: 0,
-      avatar: "assets/images/user.png",
+      avatar: 'assets/images/user.png',
       isOnline: true
     },
     {
       id: '2',
       name: 'друг',
-      lastMessage: 'как дела?',
+      lastMessage: 'жду тебя завтра',
       time: '09:15',
       unread: 0,
       avatar: 'assets/images/friend.png',
@@ -28,8 +28,8 @@ export class ChatService {
     {
       id: '3',
       name: 'работа',
-      lastMessage: 'почему опаздваем?',
-      time: '10:10',
+      lastMessage: 'почему опаздываем?',
+      time: 'Вчера',
       unread: 0,
       avatar: 'assets/images/work.png',
       isOnline: true
@@ -38,13 +38,15 @@ export class ChatService {
 
   private messages: { [chatId: string]: Message[] } = {
     '1': [
-       { text: 'Привет! Как дела?', time: '10:25', isOutgoing: false, senderName: 'User' },
+      { id: '1_1', text: 'Привет! Как дела?', time: '10:25', isOutgoing: false, senderName: 'user' },
+       { id: '1_2', text: 'Привет! Как дела?', time: '10:25', isOutgoing: false, senderName: 'user' },
     ],
     '2': [
-      
+      { id: '2_1', text: 'жду тебя завтра', time: '09:10', isOutgoing: true },
+    
     ],
     '3': [
-      
+      { id: '3_1', text: 'почему опаздываем?', time: 'Вчера, 10:00', isOutgoing: false, senderName: 'работа' },
     ]
   };
 
@@ -81,6 +83,7 @@ export class ChatService {
     }
 
     const newMessage: Message = {
+      id: `${chatId}_${Date.now()}`,
       text,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isOutgoing: true,
@@ -94,6 +97,38 @@ export class ChatService {
       this.chats[chatIndex].lastMessage = text;
       this.chats[chatIndex].time = newMessage.time;
       this.chatsSubject.next([...this.chats]);
+    }
+  }
+
+  // Удаление сообщения
+  deleteMessage(chatId: string, messageId: string): void {
+    if (!this.messages[chatId]) return;
+
+    const messageIndex = this.messages[chatId].findIndex(msg => msg.id === messageId);
+    if (messageIndex !== -1) {
+      const isLastMessage = messageIndex === this.messages[chatId].length - 1;
+      
+      this.messages[chatId].splice(messageIndex, 1);
+      
+      if (isLastMessage && this.messages[chatId].length > 0) {
+        const lastMessage = this.messages[chatId][this.messages[chatId].length - 1];
+        const chatIndex = this.chats.findIndex(chat => chat.id === chatId);
+        
+        if (chatIndex !== -1) {
+          this.chats[chatIndex].lastMessage = lastMessage.text;
+          this.chats[chatIndex].time = lastMessage.time;
+          this.chatsSubject.next([...this.chats]);
+        }
+      }
+      
+      if (this.messages[chatId].length === 0) {
+        const chatIndex = this.chats.findIndex(chat => chat.id === chatId);
+        if (chatIndex !== -1) {
+          this.chats[chatIndex].lastMessage = 'Нет сообщений';
+          this.chats[chatIndex].time = '';
+          this.chatsSubject.next([...this.chats]);
+        }
+      }
     }
   }
 

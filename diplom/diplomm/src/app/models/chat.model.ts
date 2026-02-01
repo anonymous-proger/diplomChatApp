@@ -9,10 +9,11 @@ export interface Chat {
 }
 
 export interface Message {
-  id?: string;
+  id?: string;       
   text: string;
   time: string;
   isOutgoing: boolean;
   senderName?: string;
   status?: 'sent' | 'delivered' | 'read';
+  isDeleting?: boolean; 
 }
