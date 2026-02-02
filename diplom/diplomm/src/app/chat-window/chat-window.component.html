@@ -33,14 +33,13 @@
         <span>{{ isTodayMessage(messages[0].time) ? 'Today' : 'Yesterday' }}</span>
       </div>
 
-      <!-- Сообщения -->
       <div *ngFor="let message of messages; let i = index" 
            class="message-wrapper"
            [class.outgoing]="message.isOutgoing"
            [class.with-avatar]="!message.isOutgoing && shouldShowAvatar(i)"
+           [class.active]="isMessageActive(message.id || '')"
            [class.deleting]="getMessageClass(message.id || '') === 'deleting'"
-           (mouseenter)="onMessageMouseEnter(message.id || '')"
-           (mouseleave)="onMessageMouseLeave()">
+           (click)="onMessageClick(message.id || '', $event)">
         
         <div class="message-avatar" *ngIf="!message.isOutgoing && shouldShowAvatar(i)">
           <img [src]="selectedChat.avatar" [alt]="selectedChat.name" />
@@ -58,22 +57,22 @@
             <div class="message-footer">
               <span class="message-time">{{ getMessageTime(message.time) }}</span>
             </div>
+            
+            <button 
+              class="delete-btn" 
+              *ngIf="shouldShowDeleteButton(message.id || '')"
+              (click)="deleteMessage(message.id || '', $event)"
+              title="Delete message"
+            >
+              🗑️
+            </button>
           </div>
         </div>
-
-        <button 
-          class="delete-btn" 
-          *ngIf="shouldShowDeleteButton(message.id || '')"
-          (click)="deleteMessage(message.id || '')"
-          title="Delete message"
-          (mouseenter)="onMessageMouseEnter(message.id || '')"
-        >
-          🗑️
-        </button>
       </div>
     </div>
   </div>
 
+  <!-- Поле ввода -->
   <div class="message-input-container">
     <div class="input-actions">
       <button class="action-btn" title="Attach file">
@@ -87,7 +86,7 @@
     <div class="input-wrapper">
       <textarea 
         class="message-input" 
-        placeholder="Напишите что нибудь..."
+        placeholder="Напишите что-нибудь..."
         [(ngModel)]="newMessage"
         (keydown)="onKeyPress($event)"
         rows="1"
@@ -100,7 +99,7 @@
       (click)="sendMessage()"
       [disabled]="!newMessage.trim()"
     >
-      Send
+      отправить
     </button>
   </div>
 </div>

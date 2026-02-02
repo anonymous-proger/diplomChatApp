@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked, HostListener } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ChatService } from '../services/chat.service';
 import { Chat, Message } from '../models/chat.model';
@@ -15,7 +15,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   messages: Message[] = [];
   newMessage: string = '';
   
-  hoveredMessageId: string | null = null;
+  clickedMessageId: string | null = null;
   deletingMessageId: string | null = null;
   
   private subscriptions: Subscription = new Subscription();
@@ -45,6 +45,17 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const isMessageClick = target.closest('.message-wrapper');
+    const isDeleteButton = target.closest('.delete-btn');
+    
+    if (!isMessageClick && !isDeleteButton) {
+      this.clickedMessageId = null;
+    }
   }
 
   sendMessage(): void {
@@ -99,18 +110,23 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     return time1 !== time2;
   }
 
-  onMessageMouseEnter(messageId: string): void {
-    if (this.deletingMessageId !== messageId) {
-      this.hoveredMessageId = messageId;
+  onMessageClick(messageId: string, event: MouseEvent): void {
+    event.stopPropagation(); 
+    
+    if (this.deletingMessageId === messageId) {
+      return; 
+    }
+    
+    if (this.clickedMessageId === messageId) {
+      this.clickedMessageId = null;
+    } else {
+      this.clickedMessageId = messageId;
     }
   }
 
-  onMessageMouseLeave(): void {
-    this.hoveredMessageId = null;
-  }
-
-  // Удаление сообщения
-  deleteMessage(messageId: string): void {
+  deleteMessage(messageId: string, event: MouseEvent): void {
+    event.stopPropagation(); 
+    
     if (!this.selectedChat) return;
     
     this.deletingMessageId = messageId;
@@ -119,23 +135,27 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
       this.chatService.deleteMessage(this.selectedChat!.id, messageId);
       this.messages = this.chatService.getMessages(this.selectedChat!.id);
       this.deletingMessageId = null;
-      this.hoveredMessageId = null;
-    }, 300);
+      this.clickedMessageId = null;
+    }, 300); 
   }
 
   private resetMessageStates(): void {
-    this.hoveredMessageId = null;
+    this.clickedMessageId = null;
     this.deletingMessageId = null;
   }
 
   shouldShowDeleteButton(messageId: string): boolean {
-    return this.hoveredMessageId === messageId && this.deletingMessageId !== messageId;
+    return this.clickedMessageId === messageId && this.deletingMessageId !== messageId;
   }
 
   getMessageClass(messageId: string): string {
     if (this.deletingMessageId === messageId) {
-      return 'удалено';
+      return 'deleting';
     }
     return '';
+  }
+
+  isMessageActive(messageId: string): boolean {
+    return this.clickedMessageId === messageId;
   }
 }
