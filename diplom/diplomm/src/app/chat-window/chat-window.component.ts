@@ -10,6 +10,7 @@ import { Chat, Message } from '../models/chat.model';
 })
 export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+  @ViewChild('messageInput') private messageInput!: ElementRef;
   
   selectedChat: Chat | null = null;
   messages: Message[] = [];
@@ -17,6 +18,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   
   clickedMessageId: string | null = null;
   deletingMessageId: string | null = null;
+  
+  showEmojiPanel: boolean = false;
   
   private subscriptions: Subscription = new Subscription();
   private shouldScrollToBottom = false;
@@ -30,6 +33,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.messages = this.chatService.getMessages(chat.id);
         this.shouldScrollToBottom = true;
         this.resetMessageStates();
+        this.closeEmojiPanel(); 
       }
     });
 
@@ -50,11 +54,20 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
+    
     const isMessageClick = target.closest('.message-wrapper');
     const isDeleteButton = target.closest('.delete-btn');
     
     if (!isMessageClick && !isDeleteButton) {
       this.clickedMessageId = null;
+    }
+    
+    const isEmojiButton = target.closest('.emoji-btn');
+    const isEmojiPanel = target.closest('.emoji-panel');
+    const isEmojiPanelButton = target.closest('[title="Emoji"]');
+    
+    if (!isEmojiButton && !isEmojiPanel && !isEmojiPanelButton) {
+      this.closeEmojiPanel();
     }
   }
 
@@ -66,12 +79,17 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.newMessage = '';
     this.shouldScrollToBottom = true;
     this.resetMessageStates();
+    this.closeEmojiPanel(); 
   }
 
   onKeyPress(event: KeyboardEvent): void {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       this.sendMessage();
+    }
+    
+    if (event.key === 'Escape' && this.showEmojiPanel) {
+      this.closeEmojiPanel();
     }
   }
 
@@ -112,9 +130,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   onMessageClick(messageId: string, event: MouseEvent): void {
     event.stopPropagation(); 
-    
     if (this.deletingMessageId === messageId) {
-      return; 
+      return;
     }
     
     if (this.clickedMessageId === messageId) {
@@ -122,6 +139,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     } else {
       this.clickedMessageId = messageId;
     }
+    
+    this.closeEmojiPanel(); 
   }
 
   deleteMessage(messageId: string, event: MouseEvent): void {
@@ -157,5 +176,35 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   isMessageActive(messageId: string): boolean {
     return this.clickedMessageId === messageId;
+  }
+
+  toggleEmojiPanel(event: MouseEvent): void {
+    event.stopPropagation(); 
+    
+    if (this.showEmojiPanel) {
+      this.closeEmojiPanel();
+    } else {
+      this.openEmojiPanel();
+    }
+  }
+
+  openEmojiPanel(): void {
+    this.showEmojiPanel = true;
+    setTimeout(() => {
+      if (this.messageInput) {
+        this.messageInput.nativeElement.focus();
+      }
+    }, 100);
+  }
+
+  closeEmojiPanel(): void {
+    this.showEmojiPanel = false;
+  }
+
+  onEmojiSelected(emoji: string): void {
+    if (this.messageInput) {
+      this.newMessage += emoji;
+      this.messageInput.nativeElement.focus();
+    }
   }
 }

@@ -1,0 +1,21 @@
+<div class="emoji-panel-overlay" (click)="closePanel()">
+  <div class="emoji-panel" (click)="$event.stopPropagation()">
+    <div class="panel-header">
+      <button class="close-btn" (click)="closePanel()">×</button>
+    </div>
+    
+    <div class="emoji-grid">
+      <button 
+        *ngFor="let emoji of emojis" 
+        class="emoji-btn"
+        (click)="selectEmoji(emoji)"
+        [attr.aria-label]="'Select emoji ' + emoji"
+      >
+        {{ emoji }}
+      </button>
+    </div>
+    
+    <div class="panel-footer">
+    </div>
+  </div>
+</div>
