@@ -1,0 +1,15 @@
+<div class="reply-preview" *ngIf="replyTo">
+  <div class="reply-header">
+    <span class="reply-icon">{{ getReplyIcon() }}</span>
+    <span class="reply-title">{{ getReplyTitle() }}</span>
+    <button class="cancel-btn" (click)="onCancel()" title="Cancel reply">
+      ✕
+    </button>
+  </div>
+  
+  <div class="reply-content">
+    <div class="reply-text">
+      {{ replyTo.preview || replyTo.text }}
+    </div>
+  </div>
+</div>

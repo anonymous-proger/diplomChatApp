@@ -8,12 +8,21 @@ export interface Chat {
   isOnline?: boolean;
 }
 
+export interface ReplyMessage {
+  id: string;
+  senderName: string;
+  text: string;
+  preview?: string; 
+  isOutgoing?: boolean;
+}
+
 export interface Message {
-  id?: string;       
+  id?: string;
   text: string;
   time: string;
   isOutgoing: boolean;
   senderName?: string;
   status?: 'sent' | 'delivered' | 'read';
-  isDeleting?: boolean; 
+  isDeleting?: boolean;
+  replyTo?: ReplyMessage; 
 }

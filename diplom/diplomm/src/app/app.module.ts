@@ -7,6 +7,8 @@ import { HeaderComponent } from './header/header.component';
 import { ChatPanelComponent } from './chat-panel/chat-panel.component';
 import { ChatWindowComponent } from './chat-window/chat-window.component';
 import { EmojiPanelComponent } from './emoji-panel/emoji-panel.component';
+import { ReplyPreviewComponent } from './reply-preview/reply-preview.component';
+import { MessageReplyComponent } from './message-reply/message-reply.component';
 
 @NgModule({
   declarations: [
@@ -14,7 +16,9 @@ import { EmojiPanelComponent } from './emoji-panel/emoji-panel.component';
     HeaderComponent,
     ChatPanelComponent,
     ChatWindowComponent,
-    EmojiPanelComponent 
+    EmojiPanelComponent,
+    ReplyPreviewComponent, 
+    MessageReplyComponent  
   ],
   imports: [
     BrowserModule,

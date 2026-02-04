@@ -243,9 +243,10 @@
   flex-direction: column;
   width: 100%;
   transition: all 0.2s ease;
+  max-width: 50%; /* Ограничиваем ширину 50% */
 
   &.with-avatar {
-    max-width: calc(70% - 44px); 
+    max-width: calc(50% - 44px); /* Учитываем ширину аватара и отступ */
   }
 }
 

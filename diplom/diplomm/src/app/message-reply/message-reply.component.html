@@ -1,0 +1,14 @@
+<div class="message-reply" *ngIf="replyTo">
+  <div class="reply-indicator" [style.border-left-color]="getBorderColor()"></div>
+  
+  <div class="reply-content">
+    <div class="reply-header">
+      <span class="reply-icon">{{ getReplyIcon() }}</span>
+      <span class="reply-author">{{ getReplyTitle() }}</span>
+    </div>
+    
+    <div class="reply-text">
+      {{ replyTo.preview || replyTo.text }}
+    </div>
+  </div>
+</div>
