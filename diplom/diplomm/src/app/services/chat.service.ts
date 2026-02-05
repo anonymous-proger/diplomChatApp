@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Chat, Message } from '../models/chat.model';
+import { Chat, Message, ReplyMessage } from '../models/chat.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +19,7 @@ export class ChatService {
     {
       id: '2',
       name: 'друг',
-      lastMessage: 'жду тебя завтра',
+      lastMessage: 'ты где?',
       time: '09:15',
       unread: 0,
       avatar: 'assets/images/friend.png',
@@ -27,7 +27,7 @@ export class ChatService {
     },
     {
       id: '3',
-      name: 'работа',
+      name: 'Работа',
       lastMessage: 'почему опаздываем?',
       time: 'Вчера',
       unread: 0,
@@ -38,15 +38,19 @@ export class ChatService {
 
   private messages: { [chatId: string]: Message[] } = {
     '1': [
-      { id: '1_1', text: 'Привет! Как дела?', time: '10:25', isOutgoing: false, senderName: 'user' },
-       { id: '1_2', text: 'Привет! Как дела?', time: '10:25', isOutgoing: false, senderName: 'user' },
+      { 
+        id: '1_1', 
+        text: 'Привет! Как дела?', 
+        time: '10:25', 
+        isOutgoing: false, 
+        senderName: 'User' 
+      },
     ],
     '2': [
-      { id: '2_1', text: 'жду тебя завтра', time: '09:10', isOutgoing: true },
-    
+
     ],
     '3': [
-      { id: '3_1', text: 'почему опаздываем?', time: 'Вчера, 10:00', isOutgoing: false, senderName: 'работа' },
+
     ]
   };
 
@@ -77,7 +81,7 @@ export class ChatService {
     return this.messages[chatId] || [];
   }
 
-  sendMessage(chatId: string, text: string): void {
+  sendMessage(chatId: string, text: string, replyTo?: ReplyMessage): void {
     if (!this.messages[chatId]) {
       this.messages[chatId] = [];
     }
@@ -87,7 +91,8 @@ export class ChatService {
       text,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isOutgoing: true,
-      status: 'sent'
+      status: 'sent',
+      replyTo: replyTo
     };
 
     this.messages[chatId].push(newMessage);
@@ -100,7 +105,6 @@ export class ChatService {
     }
   }
 
-  // Удаление сообщения
   deleteMessage(chatId: string, messageId: string): void {
     if (!this.messages[chatId]) return;
 

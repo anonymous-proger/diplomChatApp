@@ -26,7 +26,7 @@ export class ReplyService {
       isReplying: true,
       replyTo: {
         ...replyTo,
-        preview: this.getTextPreview(replyTo.text) 
+        preview: this.getTextPreview(replyTo.text)
       },
       originalMessageId
     };

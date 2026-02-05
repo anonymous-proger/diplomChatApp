@@ -17,8 +17,8 @@ import { MessageReplyComponent } from './message-reply/message-reply.component';
     ChatPanelComponent,
     ChatWindowComponent,
     EmojiPanelComponent,
-    ReplyPreviewComponent, 
-    MessageReplyComponent  
+    ReplyPreviewComponent,
+    MessageReplyComponent
   ],
   imports: [
     BrowserModule,

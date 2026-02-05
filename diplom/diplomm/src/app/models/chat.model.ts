@@ -12,7 +12,7 @@ export interface ReplyMessage {
   id: string;
   senderName: string;
   text: string;
-  preview?: string; 
+  preview?: string;
   isOutgoing?: boolean;
 }
 
@@ -24,5 +24,5 @@ export interface Message {
   senderName?: string;
   status?: 'sent' | 'delivered' | 'read';
   isDeleting?: boolean;
-  replyTo?: ReplyMessage; 
+  replyTo?: ReplyMessage;
 }

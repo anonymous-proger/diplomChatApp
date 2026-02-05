@@ -1,5 +1,4 @@
 <div class="chat-window" *ngIf="selectedChat;">
-  <!-- Заголовок чата -->
   <div class="chat-header">
     <div class="chat-info">
       <div class="avatar-container">
@@ -33,7 +32,6 @@
         <span>{{ isTodayMessage(messages[0].time) ? 'Today' : 'Yesterday' }}</span>
       </div>
 
-      <!-- Сообщения -->
       <div *ngFor="let message of messages; let i = index" 
            class="message-wrapper"
            [class.outgoing]="message.isOutgoing"
@@ -54,28 +52,39 @@
           </div>
 
           <div class="message-bubble">
+            <app-message-reply 
+              *ngIf="message.replyTo" 
+              [replyTo]="message.replyTo"
+            ></app-message-reply>
+            
             <p class="message-text">{{ message.text }}</p>
+            
             <div class="message-footer">
               <span class="message-time">{{ getMessageTime(message.time) }}</span>
               
+              <span class="message-status" *ngIf="message.isOutgoing">
+                {{ message.status === 'read' ? '✓✓' : 
+                   message.status === 'delivered' ? '✓✓' : '✓' }}
+              </span>
             </div>
             
-            <button 
-              class="delete-btn" 
-              *ngIf="shouldShowDeleteButton(message.id || '')"
-              (click)="deleteMessage(message.id || '', $event)"
-              title="Delete message"
-            >
-              🗑️
-            </button>
-
-            <!-- <button 
-              class="action-btn reply-action-btn" 
-              (click)="startReply(message, $event)"
-              title="Reply to message"
-            >
-              ↩️
-            </button> -->
+            <div class="message-actions" *ngIf="shouldShowActions(message.id || '')">
+              <button 
+                class="action-btn delete-action-btn" 
+                (click)="deleteMessage(message.id || '', $event)"
+                title="Delete message"
+              >
+                🗑️
+              </button>
+              
+              <button 
+                class="action-btn reply-action-btn" 
+                (click)="startReply(message, $event)"
+                title="Ответ на сообщение"
+              >
+                ↩️
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -83,6 +92,13 @@
   </div>
 
   <div class="message-input-container">
+    <app-reply-preview
+      *ngIf="replyState?.isReplying"
+      [replyTo]="replyState?.replyTo"
+      [originalMessageId]="replyState?.originalMessageId"
+      (cancel)="cancelReply()"
+    ></app-reply-preview>
+    
     <div class="input-actions">
       <button class="action-btn" title="Attach file">
         📎
@@ -100,7 +116,7 @@
     <div class="input-wrapper">
       <textarea 
         class="message-input" 
-        placeholder="Напишиите что-нибудь..."
+        placeholder="Type a message..."
         [(ngModel)]="newMessage"
         (keydown)="onKeyPress($event)"
         rows="1"
@@ -117,7 +133,6 @@
     </button>
   </div>
 
-  <!-- Панель эмодзи -->
   <app-emoji-panel 
     *ngIf="showEmojiPanel"
     (emojiSelected)="onEmojiSelected($event)"
@@ -125,4 +140,3 @@
   >
   </app-emoji-panel>
 </div>
-

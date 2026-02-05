@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked, HostListener } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ChatService } from '../services/chat.service';
-import { Chat, Message } from '../models/chat.model';
+import { ReplyService } from '../services/reply.service';
+import { Chat, Message, ReplyMessage } from '../models/chat.model';
 
 @Component({
   selector: 'app-chat-window',
@@ -16,15 +17,20 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   messages: Message[] = [];
   newMessage: string = '';
   
-  clickedMessageId: string | null = null;
+  activeMessageId: string | null = null;
   deletingMessageId: string | null = null;
   
   showEmojiPanel: boolean = false;
   
+  replyState: any = null;
+  
   private subscriptions: Subscription = new Subscription();
   private shouldScrollToBottom = false;
 
-  constructor(private chatService: ChatService) {}
+  constructor(
+    private chatService: ChatService,
+    private replyService: ReplyService
+  ) {}
 
   ngOnInit(): void {
     const chatSub = this.chatService.selectedChat$.subscribe(chat => {
@@ -33,11 +39,23 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.messages = this.chatService.getMessages(chat.id);
         this.shouldScrollToBottom = true;
         this.resetMessageStates();
-        this.closeEmojiPanel(); 
+        this.closeEmojiPanel();
+        this.replyService.cancelReply();
+      }
+    });
+
+    const replySub = this.replyService.replyState$.subscribe(state => {
+      this.replyState = state;
+      
+      if (state.isReplying && this.messageInput) {
+        setTimeout(() => {
+          this.messageInput.nativeElement.focus();
+        }, 100);
       }
     });
 
     this.subscriptions.add(chatSub);
+    this.subscriptions.add(replySub);
   }
 
   ngAfterViewChecked(): void {
@@ -56,10 +74,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     const target = event.target as HTMLElement;
     
     const isMessageClick = target.closest('.message-wrapper');
-    const isDeleteButton = target.closest('.delete-btn');
+    const isActionButton = target.closest('.action-btn');
     
-    if (!isMessageClick && !isDeleteButton) {
-      this.clickedMessageId = null;
+    if (!isMessageClick && !isActionButton) {
+      this.activeMessageId = null;
     }
     
     const isEmojiButton = target.closest('.emoji-btn');
@@ -74,12 +92,26 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   sendMessage(): void {
     if (!this.newMessage.trim() || !this.selectedChat) return;
 
-    this.chatService.sendMessage(this.selectedChat.id, this.newMessage);
+    const replyState = this.replyService.getCurrentState();
+    let replyTo: ReplyMessage | undefined = undefined;
+    
+    if (replyState.isReplying && replyState.replyTo) {
+      replyTo = {
+        id: replyState.originalMessageId || '',
+        senderName: replyState.replyTo.senderName,
+        text: replyState.replyTo.text,
+        isOutgoing: replyState.replyTo.isOutgoing,
+        preview: replyState.replyTo.preview || this.getTextPreview(replyState.replyTo.text)
+      };
+    }
+
+    this.chatService.sendMessage(this.selectedChat.id, this.newMessage, replyTo);
     this.messages = this.chatService.getMessages(this.selectedChat.id);
     this.newMessage = '';
     this.shouldScrollToBottom = true;
     this.resetMessageStates();
-    this.closeEmojiPanel(); 
+    this.closeEmojiPanel();
+    this.replyService.completeReply();
   }
 
   onKeyPress(event: KeyboardEvent): void {
@@ -129,22 +161,27 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   onMessageClick(messageId: string, event: MouseEvent): void {
-    event.stopPropagation(); 
+    event.stopPropagation();
+    
     if (this.deletingMessageId === messageId) {
       return;
     }
     
-    if (this.clickedMessageId === messageId) {
-      this.clickedMessageId = null;
+    if (this.activeMessageId === messageId) {
+      this.activeMessageId = null;
     } else {
-      this.clickedMessageId = messageId;
+      this.activeMessageId = messageId;
     }
     
-    this.closeEmojiPanel(); 
+    this.closeEmojiPanel();
+  }
+
+  shouldShowActions(messageId: string): boolean {
+    return this.activeMessageId === messageId && this.deletingMessageId !== messageId;
   }
 
   deleteMessage(messageId: string, event: MouseEvent): void {
-    event.stopPropagation(); 
+    event.stopPropagation();
     
     if (!this.selectedChat) return;
     
@@ -154,17 +191,40 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
       this.chatService.deleteMessage(this.selectedChat!.id, messageId);
       this.messages = this.chatService.getMessages(this.selectedChat!.id);
       this.deletingMessageId = null;
-      this.clickedMessageId = null;
-    }, 300); 
+      this.activeMessageId = null;
+    }, 300);
+  }
+
+  startReply(message: Message, event: MouseEvent): void {
+    event.stopPropagation();
+    
+    if (!message.id) return;
+    
+    const replyTo: ReplyMessage = {
+      id: message.id,
+      senderName: message.senderName || this.selectedChat?.name || 'Unknown',
+      text: message.text,
+      isOutgoing: message.isOutgoing,
+      preview: this.getTextPreview(message.text)
+    };
+    
+    this.replyService.startReply(replyTo, message.id);
+    this.activeMessageId = null;
+    
+    setTimeout(() => {
+      if (this.messageInput) {
+        this.messageInput.nativeElement.focus();
+      }
+    }, 100);
+  }
+
+  cancelReply(): void {
+    this.replyService.cancelReply();
   }
 
   private resetMessageStates(): void {
-    this.clickedMessageId = null;
+    this.activeMessageId = null;
     this.deletingMessageId = null;
-  }
-
-  shouldShowDeleteButton(messageId: string): boolean {
-    return this.clickedMessageId === messageId && this.deletingMessageId !== messageId;
   }
 
   getMessageClass(messageId: string): string {
@@ -175,11 +235,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   isMessageActive(messageId: string): boolean {
-    return this.clickedMessageId === messageId;
+    return this.activeMessageId === messageId;
   }
 
   toggleEmojiPanel(event: MouseEvent): void {
-    event.stopPropagation(); 
+    event.stopPropagation();
     
     if (this.showEmojiPanel) {
       this.closeEmojiPanel();
@@ -206,5 +266,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
       this.newMessage += emoji;
       this.messageInput.nativeElement.focus();
     }
+  }
+
+  private getTextPreview(text: string, maxLength: number = 100): string {
+    if (text.length <= maxLength) {
+      return text;
+    }
+    return text.substring(0, maxLength) + '...';
   }
 }
