@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { ReplyMessage } from '../models/chat.model';
 
 @Component({
@@ -8,7 +8,8 @@ import { ReplyMessage } from '../models/chat.model';
 })
 export class MessageReplyComponent {
   @Input() replyTo: ReplyMessage | null = null;
-  
+  @Output() replyClicked = new EventEmitter<string>();
+
   getReplyIcon(): string {
     if (!this.replyTo) return '↩️';
     
@@ -28,6 +29,12 @@ export class MessageReplyComponent {
       return 'You';
     } else {
       return this.replyTo.senderName || 'Unknown';
+    }
+  }
+
+  onReplyClick(): void {
+    if (this.replyTo?.id) {
+      this.replyClicked.emit(this.replyTo.id);
     }
   }
 }

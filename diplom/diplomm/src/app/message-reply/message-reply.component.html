@@ -1,4 +1,4 @@
-<div class="message-reply" *ngIf="replyTo">
+<div class="message-reply" *ngIf="replyTo" (click)="onReplyClick()">
   <div class="reply-indicator" [style.border-left-color]="getBorderColor()"></div>
   
   <div class="reply-content">

@@ -34,6 +34,7 @@
 
       <div *ngFor="let message of messages; let i = index" 
            class="message-wrapper"
+           [id]="'message-' + (message.id || '')"
            [class.outgoing]="message.isOutgoing"
            [class.with-avatar]="!message.isOutgoing && shouldShowAvatar(i)"
            [class.active]="isMessageActive(message.id || '')"
@@ -55,17 +56,13 @@
             <app-message-reply 
               *ngIf="message.replyTo" 
               [replyTo]="message.replyTo"
+              (replyClicked)="onReplyClick($event)"
             ></app-message-reply>
             
             <p class="message-text">{{ message.text }}</p>
             
             <div class="message-footer">
               <span class="message-time">{{ getMessageTime(message.time) }}</span>
-              
-              <span class="message-status" *ngIf="message.isOutgoing">
-                {{ message.status === 'read' ? '✓✓' : 
-                   message.status === 'delivered' ? '✓✓' : '✓' }}
-              </span>
             </div>
             
             <div class="message-actions" *ngIf="shouldShowActions(message.id || '')">
@@ -80,7 +77,7 @@
               <button 
                 class="action-btn reply-action-btn" 
                 (click)="startReply(message, $event)"
-                title="Ответ на сообщение"
+                title="Reply to message"
               >
                 ↩️
               </button>
