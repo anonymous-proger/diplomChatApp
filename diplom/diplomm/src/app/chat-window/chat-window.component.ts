@@ -46,12 +46,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
 
     const replySub = this.replyService.replyState$.subscribe(state => {
       this.replyState = state;
-      
-      if (state.isReplying && this.messageInput) {
-        setTimeout(() => {
-          this.messageInput.nativeElement.focus();
-        }, 100);
-      }
     });
 
     this.subscriptions.add(chatSub);
@@ -79,14 +73,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     if (!isMessageClick && !isActionButton) {
       this.activeMessageId = null;
     }
-    
-    const isEmojiButton = target.closest('.emoji-btn');
-    const isEmojiPanel = target.closest('.emoji-panel');
-    const isEmojiPanelButton = target.closest('[title="Emoji"]');
-    
-    if (!isEmojiButton && !isEmojiPanel && !isEmojiPanelButton) {
-      this.closeEmojiPanel();
-    }
   }
 
   sendMessage(): void {
@@ -110,7 +96,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.newMessage = '';
     this.shouldScrollToBottom = true;
     this.resetMessageStates();
-    this.closeEmojiPanel();
     this.replyService.completeReply();
   }
 
@@ -118,10 +103,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       this.sendMessage();
-    }
-    
-    if (event.key === 'Escape' && this.showEmojiPanel) {
-      this.closeEmojiPanel();
     }
   }
 
@@ -134,21 +115,15 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     }
   }
 
-  // НОВЫЙ МЕТОД: Прокрутка к определенному сообщению
   scrollToMessage(messageId: string): void {
     setTimeout(() => {
       try {
         const messageElement = document.getElementById(`message-${messageId}`);
         if (messageElement) {
-          // Находим контейнер сообщений
           const container = this.messagesContainer.nativeElement;
-          
-          // Вычисляем позицию для прокрутки
           const elementTop = messageElement.offsetTop;
           const elementHeight = messageElement.offsetHeight;
           const containerHeight = container.clientHeight;
-          
-          // Прокручиваем так, чтобы сообщение было в середине контейнера
           const scrollTo = elementTop - (containerHeight / 2) + (elementHeight / 2);
           
           container.scrollTo({
@@ -156,10 +131,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
             behavior: 'smooth'
           });
           
-          // Подсвечиваем сообщение на которое перешли
           this.highlightMessage(messageId);
-        } else {
-          console.warn(`Message with id ${messageId} not found`);
         }
       } catch (err) {
         console.error('Scroll to message error:', err);
@@ -167,22 +139,18 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     }, 100);
   }
 
-  // НОВЫЙ МЕТОД: Подсветка сообщения
   private highlightMessage(messageId: string): void {
-    // Сначала убираем подсветку со всех сообщений
     const highlightedElements = document.querySelectorAll('.message-highlight');
     highlightedElements.forEach(el => {
       el.classList.remove('message-highlight');
     });
     
-    // Находим нужное сообщение и добавляем подсветку
     const messageElement = document.getElementById(`message-${messageId}`);
     if (messageElement) {
       const messageWrapper = messageElement.closest('.message-wrapper');
       if (messageWrapper) {
         messageWrapper.classList.add('message-highlight');
         
-        // Автоматически убираем подсветку через 2 секунды
         setTimeout(() => {
           messageWrapper.classList.remove('message-highlight');
         }, 2000);
@@ -190,7 +158,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     }
   }
 
-  // НОВЫЙ МЕТОД: Обработчик клика на цитату
   onReplyClick(messageId: string): void {
     this.scrollToMessage(messageId);
   }
@@ -233,8 +200,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     } else {
       this.activeMessageId = messageId;
     }
-    
-    this.closeEmojiPanel();
   }
 
   shouldShowActions(messageId: string): boolean {

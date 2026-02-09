@@ -1,6 +1,7 @@
-<div class="emoji-panel-overlay" (click)="closePanel()">
-  <div class="emoji-panel" (click)="$event.stopPropagation()">
-    <div class="panel-header">
+<div class="emoji-panel-overlay">
+  <div class="emoji-panel" (mousedown)="onMouseDown($event)">
+    <div class="panel-header drag-handle">
+      <h3 class="panel-title">Emojis</h3>
       <button class="close-btn" (click)="closePanel()">×</button>
     </div>
     
@@ -16,6 +17,7 @@
     </div>
     
     <div class="panel-footer">
+      <span class="emoji-count">{{ emojis.length }} emojis</span>
     </div>
   </div>
 </div>
