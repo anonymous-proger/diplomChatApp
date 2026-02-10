@@ -9,6 +9,7 @@ import { ChatWindowComponent } from './chat-window/chat-window.component';
 import { EmojiPanelComponent } from './emoji-panel/emoji-panel.component';
 import { ReplyPreviewComponent } from './reply-preview/reply-preview.component';
 import { MessageReplyComponent } from './message-reply/message-reply.component';
+import { MessageSearchComponent } from './message-search/message-search.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { MessageReplyComponent } from './message-reply/message-reply.component';
     ChatWindowComponent,
     EmojiPanelComponent,
     ReplyPreviewComponent,
-    MessageReplyComponent
+    MessageReplyComponent,
+    MessageSearchComponent
   ],
   imports: [
     BrowserModule,

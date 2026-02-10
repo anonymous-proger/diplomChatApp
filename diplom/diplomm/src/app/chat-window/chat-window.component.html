@@ -17,14 +17,29 @@
     </div>
 
     <div class="chat-actions">
-      <button class="action-btn" title="Search in chat">
+      <button 
+        class="action-btn" 
+        title="Search messages"
+        (click)="toggleSearch()"
+        [class.active]="searchState?.isSearching"
+      >
         🔍
       </button>
+      
       <button class="action-btn" title="More options">
         ⋮
       </button>
     </div>
   </div>
+
+  <app-message-search
+    *ngIf="searchState?.isSearching"
+    [searchState]="searchState"
+    (searchTextChanged)="onSearchTextChanged($event)"
+    (nextResult)="onNextSearchResult()"
+    (prevResult)="onPrevSearchResult()"
+    (closeSearch)="onCloseSearch()"
+  ></app-message-search>
 
   <div class="messages-container" #messagesContainer>
     <div class="messages">
@@ -39,6 +54,8 @@
            [class.with-avatar]="!message.isOutgoing && shouldShowAvatar(i)"
            [class.active]="isMessageActive(message.id || '')"
            [class.deleting]="getMessageClass(message.id || '') === 'deleting'"
+           [class.search-highlight]="isSearchResult(message.id || '', i)"
+           [class.current-search-result]="isCurrentSearchResult(message.id || '', i)"
            (click)="onMessageClick(message.id || '', $event)">
         
         <div class="message-avatar" *ngIf="!message.isOutgoing && shouldShowAvatar(i)">
@@ -63,6 +80,11 @@
             
             <div class="message-footer">
               <span class="message-time">{{ getMessageTime(message.time) }}</span>
+              
+              <span class="message-status" *ngIf="message.isOutgoing">
+                {{ message.status === 'read' ? '✓✓' : 
+                   message.status === 'delivered' ? '✓✓' : '✓' }}
+              </span>
             </div>
             
             <div class="message-actions" *ngIf="shouldShowActions(message.id || '')">

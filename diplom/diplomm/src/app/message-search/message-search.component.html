@@ -1,0 +1,50 @@
+
+<div class="message-search-panel" *ngIf="searchState?.isSearching as isSearching">
+  <div class="search-container" *ngIf="searchState">
+    <div class="search-icon">🔍</div>
+    
+    <input 
+      class="search-input" 
+      type="text" 
+      placeholder="Search messages..."
+      [value]="searchInput"
+      (input)="onSearchInput($event)"
+      #searchInputField
+    />
+    
+    <div class="search-stats">
+      <span class="matches-count">{{ getTotalMatchesText() }}</span>
+      <span class="current-position" *ngIf="searchState.results.length > 0">
+        {{ getResultText() }}
+      </span>
+    </div>
+    
+    <div class="search-controls">
+      <button 
+        class="search-nav-btn prev-btn" 
+        (click)="onPrev()"
+        [disabled]="!searchState.results.length"
+        title="Previous result"
+      >
+        ◀
+      </button>
+      
+      <button 
+        class="search-nav-btn next-btn" 
+        (click)="onNext()"
+        [disabled]="!searchState.results.length"
+        title="Next result"
+      >
+        ▶
+      </button>
+      
+      <button 
+        class="search-close-btn" 
+        (click)="onClose()"
+        title="Close search"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>

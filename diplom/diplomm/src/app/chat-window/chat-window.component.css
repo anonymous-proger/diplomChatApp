@@ -37,6 +37,7 @@
   color: #718096;
   font-size: 1rem;
 }
+
 .chat-header {
   display: flex;
   justify-content: space-between;
@@ -133,6 +134,15 @@
     color: #4a5568;
   }
   
+  &.active {
+    background-color: #4a6cf7;
+    color: white;
+    
+    &:hover {
+      background-color: #3a5ce5;
+    }
+  }
+  
   &.emoji-toggle {
     &.active {
       background-color: #4a6cf7;
@@ -219,6 +229,28 @@
     height: 0;
     margin: 0;
     overflow: hidden;
+  }
+  
+  &.search-highlight {
+    background-color: rgba(255, 243, 205, 0.3);
+    border-radius: 8px;
+    
+    .message-bubble {
+      background-color: rgba(255, 243, 205, 0.1);
+    }
+  }
+  
+  &.current-search-result {
+    background-color: rgba(255, 193, 7, 0.2);
+    border-radius: 8px;
+    
+    .message-bubble {
+      box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.3);
+    }
+    
+    &.outgoing .message-bubble {
+      box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.3), 0 1px 2px rgba(74, 108, 247, 0.2);
+    }
   }
 }
 

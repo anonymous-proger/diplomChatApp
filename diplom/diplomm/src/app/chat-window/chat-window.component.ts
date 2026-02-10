@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked, 
 import { Subscription } from 'rxjs';
 import { ChatService } from '../services/chat.service';
 import { ReplyService } from '../services/reply.service';
+import { MessageSearchService, SearchState, SearchResult } from '../services/message-search.service';
 import { Chat, Message, ReplyMessage } from '../models/chat.model';
 
 @Component({
@@ -23,13 +24,15 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   showEmojiPanel: boolean = false;
   
   replyState: any = null;
+  searchState: SearchState | null = null;
   
   private subscriptions: Subscription = new Subscription();
   private shouldScrollToBottom = false;
 
   constructor(
     private chatService: ChatService,
-    private replyService: ReplyService
+    private replyService: ReplyService,
+    private messageSearchService: MessageSearchService
   ) {}
 
   ngOnInit(): void {
@@ -41,6 +44,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.resetMessageStates();
         this.closeEmojiPanel();
         this.replyService.cancelReply();
+        this.messageSearchService.stopSearch();
       }
     });
 
@@ -48,8 +52,16 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
       this.replyState = state;
     });
 
+    const searchSub = this.messageSearchService.searchState$.subscribe(state => {
+      this.searchState = state;
+      if (state.currentIndex >= 0 && state.results.length > 0) {
+        this.scrollToSearchResult(state.results[state.currentIndex]);
+      }
+    });
+
     this.subscriptions.add(chatSub);
     this.subscriptions.add(replySub);
+    this.subscriptions.add(searchSub);
   }
 
   ngAfterViewChecked(): void {
@@ -135,6 +147,30 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
         }
       } catch (err) {
         console.error('Scroll to message error:', err);
+      }
+    }, 100);
+  }
+
+  private scrollToSearchResult(result: SearchResult): void {
+    setTimeout(() => {
+      try {
+        const messageElement = document.getElementById(`message-${result.message.id}`);
+        if (messageElement) {
+          const container = this.messagesContainer.nativeElement;
+          const elementTop = messageElement.offsetTop;
+          const elementHeight = messageElement.offsetHeight;
+          const containerHeight = container.clientHeight;
+          const scrollTo = elementTop - (containerHeight / 2) + (elementHeight / 2);
+          
+          container.scrollTo({
+            top: scrollTo,
+            behavior: 'smooth'
+          });
+          
+          this.highlightMessage(result.message.id || '');
+        }
+      } catch (err) {
+        console.error('Scroll to search result error:', err);
       }
     }, 100);
   }
@@ -299,5 +335,45 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
       return text;
     }
     return text.substring(0, maxLength) + '...';
+  }
+
+  // Методы для поиска
+  toggleSearch(): void {
+    if (this.searchState?.isSearching) {
+      this.messageSearchService.stopSearch();
+    } else {
+      this.messageSearchService.startSearch();
+    }
+  }
+
+  onSearchTextChanged(searchText: string): void {
+    this.messageSearchService.searchMessages(this.messages, searchText);
+  }
+
+  onNextSearchResult(): void {
+    this.messageSearchService.goToNextResult();
+  }
+
+  onPrevSearchResult(): void {
+    this.messageSearchService.goToPrevResult();
+  }
+
+  onCloseSearch(): void {
+    this.messageSearchService.stopSearch();
+  }
+
+  isSearchResult(messageId: string, index: number): boolean {
+    if (!this.searchState?.results.length) return false;
+    
+    return this.searchState.results.some(result => 
+      result.message.id === messageId || result.index === index
+    );
+  }
+
+  isCurrentSearchResult(messageId: string, index: number): boolean {
+    if (!this.searchState?.results.length || this.searchState.currentIndex < 0) return false;
+    
+    const currentResult = this.searchState.results[this.searchState.currentIndex];
+    return currentResult.message.id === messageId || currentResult.index === index;
   }
 }
