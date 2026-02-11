@@ -51,20 +51,27 @@
            class="message-wrapper"
            [id]="'message-' + (message.id || '')"
            [class.outgoing]="message.isOutgoing"
-           [class.with-avatar]="!message.isOutgoing && shouldShowAvatar(i)"
+           [class.with-avatar]="(!message.isOutgoing && shouldShowAvatar(i)) || (message.isOutgoing && shouldShowOutgoingAvatar(i))"
            [class.active]="isMessageActive(message.id || '')"
            [class.deleting]="getMessageClass(message.id || '') === 'deleting'"
            [class.search-highlight]="isSearchResult(message.id || '', i)"
            [class.current-search-result]="isCurrentSearchResult(message.id || '', i)"
            (click)="onMessageClick(message.id || '', $event)">
         
-        <div class="message-avatar" *ngIf="!message.isOutgoing && shouldShowAvatar(i)">
+        <div class="message-avatar incoming-avatar" 
+             *ngIf="!message.isOutgoing && shouldShowAvatar(i)">
           <img [src]="selectedChat.avatar" [alt]="selectedChat.name" />
+          <div class="avatar-online-indicator" 
+               *ngIf="selectedChat.isOnline"
+               [class.online]="selectedChat.isOnline">
+          </div>
         </div>
 
-        <div class="avatar-placeholder" *ngIf="message.isOutgoing"></div>
+        <div class="avatar-placeholder incoming-placeholder" 
+             *ngIf="!message.isOutgoing && !shouldShowAvatar(i)">
+        </div>
 
-        <div class="message" [class.with-avatar]="!message.isOutgoing && shouldShowAvatar(i)">
+        <div class="message" [class.with-avatar]="!message.isOutgoing && shouldShowAvatar(i) || message.isOutgoing && shouldShowOutgoingAvatar(i)">
           <div class="sender-name" *ngIf="!message.isOutgoing && message.senderName && shouldShowAvatar(i)">
             {{ message.senderName }}
           </div>
@@ -106,6 +113,20 @@
             </div>
           </div>
         </div>
+
+        <div class="message-avatar outgoing-avatar" 
+             *ngIf="message.isOutgoing && shouldShowOutgoingAvatar(i)">
+          <img [src]="currentUserAvatar" [alt]="'You'" />
+          <div class="avatar-online-indicator" 
+               *ngIf="currentUserIsOnline"
+               [class.online]="currentUserIsOnline">
+          </div>
+        </div>
+
+        <div class="avatar-placeholder outgoing-placeholder" 
+             *ngIf="message.isOutgoing && !shouldShowOutgoingAvatar(i)">
+        </div>
+
       </div>
     </div>
   </div>

@@ -26,6 +26,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   replyState: any = null;
   searchState: SearchState | null = null;
   
+  currentUserId: string = 'current-user-id';
+  currentUserAvatar: string = 'assets/images/user.png';
+  currentUserIsOnline: boolean = true;
+  
   private subscriptions: Subscription = new Subscription();
   private shouldScrollToBottom = false;
 
@@ -36,6 +40,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   ) {}
 
   ngOnInit(): void {
+    this.loadCurrentUser();
+    
     const chatSub = this.chatService.selectedChat$.subscribe(chat => {
       this.selectedChat = chat;
       if (chat) {
@@ -73,6 +79,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  private loadCurrentUser(): void {
   }
 
   @HostListener('document:click', ['$event'])
@@ -207,7 +216,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   shouldShowAvatar(index: number): boolean {
-    if (this.messages[index].isOutgoing) return false;
+    const message = this.messages[index];
+    
+    if (message.isOutgoing) {
+      return this.shouldShowOutgoingAvatar(index);
+    }
     
     if (index === 0) return true;
     
@@ -220,8 +233,32 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
             this.isDifferentTimeGroup(currentMessage.time, previousMessage.time));
   }
 
+  shouldShowOutgoingAvatar(index: number): boolean {
+    if (!this.messages[index].isOutgoing) return false;
+    
+    if (index === 0) return true;
+    
+    const currentMessage = this.messages[index];
+    const previousMessage = this.messages[index - 1];
+    
+    return !previousMessage.isOutgoing || 
+           this.isDifferentTimeGroup(currentMessage.time, previousMessage.time);
+  }
+
   private isDifferentTimeGroup(time1: string, time2: string): boolean {
-    return time1 !== time2;
+    try {
+      const date1 = new Date(time1);
+      const date2 = new Date(time2);
+      
+      if (isNaN(date1.getTime()) || isNaN(date2.getTime())) {
+        return time1 !== time2;
+      }
+      
+      const diffMinutes = Math.abs(date1.getTime() - date2.getTime()) / (1000 * 60);
+      return diffMinutes > 5;
+    } catch {
+      return time1 !== time2;
+    }
   }
 
   onMessageClick(messageId: string, event: MouseEvent): void {
@@ -337,7 +374,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     return text.substring(0, maxLength) + '...';
   }
 
-  // Методы для поиска
   toggleSearch(): void {
     if (this.searchState?.isSearching) {
       this.messageSearchService.stopSearch();
