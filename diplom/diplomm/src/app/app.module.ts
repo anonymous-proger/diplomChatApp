@@ -10,6 +10,7 @@ import { EmojiPanelComponent } from './emoji-panel/emoji-panel.component';
 import { ReplyPreviewComponent } from './reply-preview/reply-preview.component';
 import { MessageReplyComponent } from './message-reply/message-reply.component';
 import { MessageSearchComponent } from './message-search/message-search.component';
+import { ProfilePopupComponent } from './profile/profile.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { MessageSearchComponent } from './message-search/message-search.componen
     EmojiPanelComponent,
     ReplyPreviewComponent,
     MessageReplyComponent,
-    MessageSearchComponent
+    MessageSearchComponent,
+    ProfilePopupComponent
   ],
   imports: [
     BrowserModule,

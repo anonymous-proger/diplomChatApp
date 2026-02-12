@@ -1,0 +1,33 @@
+<div class="profile-overlay" (click)="onOverlayClick($event)">
+  <div class="profile-popup">
+    <button class="close-btn" (click)="onClose()">✕</button>
+    
+    <div class="profile-content">
+      <div class="avatar-container">
+        <div class="avatar">
+          <img [src]="user.avatar" [alt]="user.name">
+        </div>
+      </div>
+      
+      <h2 class="user-name">{{ user.name }}</h2>
+      
+      <div class="info-list">
+        <div class="info-item">
+          <span class="info-icon">📱</span>
+          <div class="info-text">
+            <span class="info-label">Телефон</span>
+            <span class="info-value">{{ user.phone }}</span>
+          </div>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-icon">📅</span>
+          <div class="info-text">
+            <span class="info-label">Регистрация</span>
+            <span class="info-value">{{ user.registeredAt }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

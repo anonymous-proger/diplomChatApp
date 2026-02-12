@@ -6,9 +6,14 @@
       <button class="header-btn" title="Notifications">
         🔔
       </button>
-      <button class="header-btn" title="Settings">
+      <button class="header-btn" title="Settings" (click)="openProfile()">
         ⚙️
       </button>
     </div>
   </div>
+
+  <app-profile 
+    *ngIf="showProfile"
+    (close)="closeProfile()">
+  </app-profile>
 </header>
