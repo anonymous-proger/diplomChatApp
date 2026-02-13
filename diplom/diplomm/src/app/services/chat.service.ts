@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Chat, Message, ReplyMessage } from '../models/chat.model';
+import { UserProfile } from '../profile/profile.component';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
+  private currentUser: UserProfile = {
+    name: 'John Doe',
+    avatar: 'assets/images/user.png',
+    phone: '+1 (555) 123-4567',
+    registeredAt: 'March 15, 2023'
+  };
+
   private chats: Chat[] = [
     {
       id: '1',
@@ -43,14 +51,46 @@ export class ChatService {
         text: 'Привет! Как дела?', 
         time: '10:25', 
         isOutgoing: false, 
-        senderName: 'User' 
+        senderName: 'User',
+        avatar: 'assets/images/user.png'
       },
+      {
+        id: '1_2',
+        text: 'Привет! Всё отлично, а у тебя?',
+        time: '10:26',
+        isOutgoing: true,
+        status: 'read',
+        senderName: 'User',
+        avatar: 'assets/images/user.png'
+      },
+      {
+        id: '1_3',
+        text: 'Тоже хорошо! Чем занимаешься?',
+        time: '10:27',
+        isOutgoing: false,
+        senderName: 'User',
+        avatar: 'assets/images/user.png'
+      }
     ],
     '2': [
-
+      {
+        id: '2_1',
+        text: 'ты где?',
+        time: '09:15',
+        isOutgoing: false,
+        senderName: 'друг',
+        avatar: 'assets/images/friend.png'
+      }
     ],
     '3': [
-
+      {
+        id: '3_1',
+        text: 'почему опаздываем?',
+        time: 'Вчера',
+        isOutgoing: false,
+        senderName: 'Работа',
+        avatar: 'assets/images/work.png'
+      }
     ]
   };
 
@@ -60,7 +100,19 @@ export class ChatService {
   private chatsSubject = new BehaviorSubject<Chat[]>(this.chats);
   chats$ = this.chatsSubject.asObservable();
 
+  private currentUserSubject = new BehaviorSubject<UserProfile>(this.currentUser);
+  currentUser$ = this.currentUserSubject.asObservable();
+
   constructor() {}
+
+  getCurrentUser(): UserProfile {
+    return this.currentUser;
+  }
+
+  updateCurrentUser(user: Partial<UserProfile>): void {
+    this.currentUser = { ...this.currentUser, ...user };
+    this.currentUserSubject.next(this.currentUser);
+  }
 
   getChats(): Chat[] {
     return this.chats;
@@ -92,7 +144,9 @@ export class ChatService {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isOutgoing: true,
       status: 'sent',
-      replyTo: replyTo
+      replyTo: replyTo,
+      senderName: this.currentUser.name,
+      avatar: this.currentUser.avatar
     };
 
     this.messages[chatId].push(newMessage);

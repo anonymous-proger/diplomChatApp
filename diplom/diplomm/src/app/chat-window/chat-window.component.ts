@@ -26,8 +26,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   replyState: any = null;
   searchState: SearchState | null = null;
   
-  currentUserId: string = 'current-user-id';
-  currentUserAvatar: string = 'assets/images/user.png';
+  currentUserAvatar: string = '';
   currentUserIsOnline: boolean = true;
   
   private subscriptions: Subscription = new Subscription();
@@ -40,7 +39,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   ) {}
 
   ngOnInit(): void {
-    this.loadCurrentUser();
+    const userSub = this.chatService.currentUser$.subscribe(user => {
+      this.currentUserAvatar = user.avatar;
+    });
     
     const chatSub = this.chatService.selectedChat$.subscribe(chat => {
       this.selectedChat = chat;
@@ -65,6 +66,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
       }
     });
 
+    this.subscriptions.add(userSub);
     this.subscriptions.add(chatSub);
     this.subscriptions.add(replySub);
     this.subscriptions.add(searchSub);
@@ -79,9 +81,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
-  }
-
-  private loadCurrentUser(): void {
   }
 
   @HostListener('document:click', ['$event'])
@@ -230,6 +229,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     return !currentMessage.isOutgoing && 
            (previousMessage.isOutgoing || 
             previousMessage.senderName !== currentMessage.senderName ||
+            previousMessage.avatar !== currentMessage.avatar ||
             this.isDifferentTimeGroup(currentMessage.time, previousMessage.time));
   }
 
@@ -242,6 +242,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     const previousMessage = this.messages[index - 1];
     
     return !previousMessage.isOutgoing || 
+           previousMessage.avatar !== currentMessage.avatar ||
            this.isDifferentTimeGroup(currentMessage.time, previousMessage.time);
   }
 

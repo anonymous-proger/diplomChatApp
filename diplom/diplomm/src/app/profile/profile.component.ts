@@ -16,10 +16,10 @@ export class ProfilePopupComponent {
   @Output() close = new EventEmitter<void>();
 
   user: UserProfile = {
-    name: 'пользователь',
+    name: 'user',
     avatar: 'assets/images/friend.png',
     phone: '8 800 555 35 35',
-    registeredAt: '15.01.23'
+    registeredAt: ' 15.01.23'
   };
 
   onClose(): void {

@@ -1,3 +1,22 @@
+export interface Message {
+  id: string;
+  text: string;
+  time: string;
+  isOutgoing: boolean;
+  status?: 'sent' | 'delivered' | 'read';
+  replyTo?: ReplyMessage;
+  senderName?: string;
+  avatar?: string;
+}
+
+export interface ReplyMessage {
+  id: string;
+  senderName: string;
+  text: string;
+  isOutgoing: boolean;
+  preview?: string;
+}
+
 export interface Chat {
   id: string;
   name: string;
@@ -5,24 +24,5 @@ export interface Chat {
   time: string;
   unread: number;
   avatar: string;
-  isOnline?: boolean;
-}
-
-export interface ReplyMessage {
-  id: string;
-  senderName: string;
-  text: string;
-  preview?: string;
-  isOutgoing?: boolean;
-}
-
-export interface Message {
-  id?: string;
-  text: string;
-  time: string;
-  isOutgoing: boolean;
-  senderName?: string;
-  status?: 'sent' | 'delivered' | 'read';
-  isDeleting?: boolean;
-  replyTo?: ReplyMessage;
+  isOnline: boolean;
 }

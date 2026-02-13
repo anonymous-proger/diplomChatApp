@@ -60,10 +60,10 @@
         
         <div class="message-avatar incoming-avatar" 
              *ngIf="!message.isOutgoing && shouldShowAvatar(i)">
-          <img [src]="selectedChat.avatar" [alt]="selectedChat.name" />
+          <img [src]="message.avatar || selectedChat?.avatar" [alt]="message.senderName || selectedChat?.name" />
           <div class="avatar-online-indicator" 
-               *ngIf="selectedChat.isOnline"
-               [class.online]="selectedChat.isOnline">
+               *ngIf="selectedChat?.isOnline"
+               [class.online]="selectedChat?.isOnline">
           </div>
         </div>
 
@@ -116,7 +116,7 @@
 
         <div class="message-avatar outgoing-avatar" 
              *ngIf="message.isOutgoing && shouldShowOutgoingAvatar(i)">
-          <img [src]="currentUserAvatar" [alt]="'You'" />
+          <img [src]="message.avatar || currentUserAvatar" [alt]="'You'" />
           <div class="avatar-online-indicator" 
                *ngIf="currentUserIsOnline"
                [class.online]="currentUserIsOnline">
